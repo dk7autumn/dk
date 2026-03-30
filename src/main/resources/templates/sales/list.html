@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>售卖记录 - 水产店售卖记录系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { background: #2c3e50; color: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
+        .nav { display: flex; gap: 15px; margin-bottom: 20px; }
+        .nav a { background: #3498db; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; }
+        .nav a:hover { background: #2980b9; }
+        .card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .card h2 { margin-bottom: 15px; color: #2c3e50; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #34495e; color: white; }
+        tr:hover { background: #f5f5f5; }
+        .btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-primary { background: #3498db; color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-success { background: #27ae60; color: white; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; color: #2c3e50; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .actions { display: flex; gap: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>水产店售卖记录系统</h1>
+        </div>
+        <div class="nav">
+            <a th:href="@{/fish}">鱼类管理</a>
+            <a th:href="@{/sales}" class="active">售卖记录</a>
+            <a th:href="@{/sales/stats}">统计报表</a>
+        </div>
+
+        <div class="card">
+            <h2>添加售卖记录</h2>
+            <form th:action="@{/sales/add}" method="post">
+                <div class="form-group">
+                    <label>选择鱼类</label>
+                    <select name="fishId" required>
+                        <option th:each="fish : ${fishList}" th:value="${fish.id}" th:text="${fish.name + ' - ¥' + fish.price + '/斤'}"></option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>数量 (斤)</label>
+                    <input type="number" step="0.1" name="quantity" required placeholder="输入售卖数量"/>
+                </div>
+                <div class="form-group">
+                    <label>售卖日期</label>
+                    <input type="date" name="saleDate" required th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"/>
+                </div>
+                <button type="submit" class="btn btn-success">保存记录</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>售卖记录列表</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>鱼类</th>
+                        <th>单价</th>
+                        <th>数量</th>
+                        <th>总金额</th>
+                        <th>售卖日期</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="record : ${saleRecords}">
+                        <td th:text="${record.id}"></td>
+                        <td th:text="${record.fish.name}"></td>
+                        <td th:text="'¥' + ${record.fish.price}"></td>
+                        <td th:text="${record.quantity} + ' 斤'"></td>
+                        <td th:text="'¥' + ${record.totalPrice}"></td>
+                        <td th:text="${record.saleDate}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
