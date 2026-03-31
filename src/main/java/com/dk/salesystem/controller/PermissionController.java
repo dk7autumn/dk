@@ -31,9 +31,11 @@ public class PermissionController {
 
     @GetMapping("/{id}")
     public ApiResponse<Permission> getById(@PathVariable Long id) {
-        return permissionService.findById(id)
-                .map(ApiResponse::success)
-                .orElse(ApiResponse.error("权限不存在"));
+        Permission permission = permissionService.findById(id);
+        if (permission == null) {
+            return ApiResponse.error("权限不存在");
+        }
+        return ApiResponse.success(permission);
     }
 
     @PostMapping

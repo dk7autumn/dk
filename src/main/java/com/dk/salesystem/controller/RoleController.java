@@ -26,9 +26,11 @@ public class RoleController {
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('system:role:query')")
     public ApiResponse<Role> getById(@PathVariable Long id) {
-        return roleService.findById(id)
-                .map(ApiResponse::success)
-                .orElse(ApiResponse.error("角色不存在"));
+        Role role = roleService.findById(id);
+        if (role == null) {
+            return ApiResponse.error("角色不存在");
+        }
+        return ApiResponse.success(role);
     }
 
     @PostMapping

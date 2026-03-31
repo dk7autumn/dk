@@ -1,28 +1,33 @@
 package com.dk.salesystem.entity;
 
-import jakarta.persistence.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
-@Entity
-@Table(name = "sale_record")
+@TableName("sale_record")
 public class SaleRecord {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @TableId(type = IdType.AUTO)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fish_id", nullable = false)
-    private Fish fish;
+    @TableField(value = "fish_id")
+    private Long fishId;
 
-    @Column(nullable = false)
+    @TableField(value = "quantity")
     private Integer quantity;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @TableField(value = "total_price")
     private BigDecimal totalPrice;
 
-    @Column(nullable = false)
+    @TableField(value = "sale_date")
     private LocalDate saleDate;
+
+    @TableField(exist = false)
+    private Fish fish;
 }

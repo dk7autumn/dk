@@ -2,8 +2,10 @@ package com.dk.salesystem.service;
 
 import com.dk.salesystem.dto.LoginRequest;
 import com.dk.salesystem.dto.LoginResponse;
+import com.dk.salesystem.entity.Permission;
+import com.dk.salesystem.entity.Role;
 import com.dk.salesystem.entity.User;
-import com.dk.salesystem.repository.UserRepository;
+import com.dk.salesystem.mapper.UserMapper;
 import com.dk.salesystem.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,6 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,7 +26,7 @@ import java.util.stream.Collectors;
 public class AuthService implements UserDetailsService {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserMapper userMapper;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -36,12 +39,45 @@ public class AuthService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("用户不存在：" + username));
+        User user = userMapper.findByUsername(username);
+        if (user == null) {
+            throw new UsernameNotFoundException("用户不存在：" + username);
+        }
         if (user.getDeleted() == 1) {
             throw new UsernameNotFoundException("用户已被删除：" + username);
         }
+
+        // Load roles and permissions for user
+        loadUserRolesAndPermissions(user);
+
         return user;
+    }
+
+    private void loadUserRolesAndPermissions(User user) {
+        List<Long> roleIds = userMapper.findRoleIdsByUserId(user.getId());
+        if (roleIds != null && !roleIds.isEmpty()) {
+            List<Role> roles = userMapper.findRolesByRoleIds(roleIds);
+            List<Long> permissionIds = new ArrayList<>();
+
+            for (Role role : roles) {
+                List<Long> rolePermissionIds = userMapper.findPermissionIdsByRoleIds(List.of(role.getId()));
+                if (rolePermissionIds != null) {
+                    permissionIds.addAll(rolePermissionIds);
+                }
+            }
+
+            if (!permissionIds.isEmpty()) {
+                List<Permission> permissions = userMapper.findPermissionsByPermissionIds(permissionIds);
+                // Remove duplicates by code
+                permissions = permissions.stream()
+                        .distinct()
+                        .collect(Collectors.toList());
+                for (Role role : roles) {
+                    role.setPermissions(permissions);
+                }
+            }
+            user.setRoles(roles);
+        }
     }
 
     public LoginResponse login(LoginRequest request) {
@@ -56,8 +92,8 @@ public class AuthService implements UserDetailsService {
         }
 
         UserDetails userDetails = loadUserByUsername(request.getUsername());
+        User user = (User) userDetails;
         String token = jwtUtil.generateToken(userDetails);
-        User user = userRepository.findByUsername(request.getUsername()).orElseThrow();
 
         List<String> roles = user.getRoles().stream()
                 .map(role -> role.getCode())
@@ -84,12 +120,13 @@ public class AuthService implements UserDetailsService {
     }
 
     public User register(User user, String rawPassword) {
-        if (userRepository.existsByUsername(user.getUsername())) {
+        if (userMapper.existsByUsername(user.getUsername())) {
             throw new RuntimeException("用户名已存在");
         }
         user.setPassword(passwordEncoder.encode(rawPassword));
         user.setStatus(1);
         user.setDeleted(0);
-        return userRepository.save(user);
+        userMapper.insert(user);
+        return user;
     }
 }

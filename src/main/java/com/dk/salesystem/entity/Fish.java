@@ -1,26 +1,29 @@
 package com.dk.salesystem.entity;
 
-import jakarta.persistence.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+
 import java.math.BigDecimal;
 
 @Data
-@Entity
-@Table(name = "fish")
+@TableName("fish")
 public class Fish {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @TableId(type = IdType.AUTO)
     private Long id;
 
-    @Column(nullable = false, length = 100)
+    @TableField(value = "name")
     private String name;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @TableField(value = "price")
     private BigDecimal price;
 
-    @Column(length = 100)
+    @TableField(value = "origin")
     private String origin;
 
-    @Column(length = 255)
+    @TableField(value = "description")
     private String description;
 }

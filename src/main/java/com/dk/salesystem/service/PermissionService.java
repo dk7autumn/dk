@@ -1,41 +1,44 @@
 package com.dk.salesystem.service;
 
 import com.dk.salesystem.entity.Permission;
-import com.dk.salesystem.repository.PermissionRepository;
+import com.dk.salesystem.mapper.PermissionMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class PermissionService {
 
     @Autowired
-    private PermissionRepository permissionRepository;
+    private PermissionMapper permissionMapper;
 
     public List<Permission> findAll() {
-        return permissionRepository.findAll();
+        return permissionMapper.selectList(null);
     }
 
     public List<Permission> findMenuTree() {
-        // 返回菜单类型的权限，用于前端构建侧边栏
-        return permissionRepository.findByStatus(1);
+        return permissionMapper.findByStatus(1);
     }
 
-    public Optional<Permission> findById(Long id) {
-        return permissionRepository.findById(id);
+    public Permission findById(Long id) {
+        return permissionMapper.selectById(id);
     }
 
     public List<Permission> findByParentId(Long parentId) {
-        return permissionRepository.findByParentId(parentId);
+        return permissionMapper.findByParentId(parentId);
     }
 
     public Permission save(Permission permission) {
-        return permissionRepository.save(permission);
+        if (permission.getId() == null) {
+            permissionMapper.insert(permission);
+        } else {
+            permissionMapper.updateById(permission);
+        }
+        return permission;
     }
 
     public void deleteById(Long id) {
-        permissionRepository.deleteById(id);
+        permissionMapper.deleteById(id);
     }
 }

@@ -1,56 +1,44 @@
 package com.dk.salesystem.entity;
 
-import jakarta.persistence.*;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
+
 import java.time.LocalDateTime;
 
 @Data
-@Entity
-@Table(name = "permission")
+@TableName("permission")
 public class Permission {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @TableId(type = IdType.AUTO)
     private Long id;
 
-    @Column(nullable = false, length = 50)
+    @TableField(value = "name", exist = true)
     private String name;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @TableField(value = "code", exist = true)
     private String code;
 
-    @Column(nullable = false)
+    @TableField(value = "type", exist = true)
     private Integer type = 1; // 1-菜单，2-按钮，3-接口
 
-    @Column(name = "parent_id")
+    @TableField(value = "parent_id", exist = true)
     private Long parentId = 0L;
 
-    @Column(length = 255)
+    @TableField(value = "path", exist = true)
     private String path;
 
-    @Column(length = 50)
+    @TableField(value = "icon", exist = true)
     private String icon;
 
-    @Column(nullable = false)
+    @TableField(value = "sort", exist = true)
     private Integer sort = 0;
 
-    @Column(nullable = false)
+    @TableField(value = "status", exist = true)
     private Integer status = 1;
 
-    @Column(name = "created_at")
+    @TableField(value = "created_at", fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @TableField(value = "updated_at", fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 }

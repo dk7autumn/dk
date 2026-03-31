@@ -1,35 +1,40 @@
 package com.dk.salesystem.service;
 
 import com.dk.salesystem.entity.Fish;
-import com.dk.salesystem.repository.FishRepository;
+import com.dk.salesystem.mapper.FishMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class FishService {
 
     @Autowired
-    private FishRepository fishRepository;
+    private FishMapper fishMapper;
 
     public List<Fish> findAll() {
-        return fishRepository.findAll();
+        return fishMapper.selectList(null);
     }
 
-    public Optional<Fish> findById(Long id) {
-        return fishRepository.findById(id);
+    public Fish findById(Long id) {
+        return fishMapper.selectById(id);
     }
 
     public Fish save(Fish fish) {
-        return fishRepository.save(fish);
+        if (fish.getId() == null) {
+            fishMapper.insert(fish);
+        } else {
+            fishMapper.updateById(fish);
+        }
+        return fish;
     }
 
     public void deleteById(Long id) {
-        fishRepository.deleteById(id);
+        fishMapper.deleteById(id);
     }
 
     public List<Fish> searchByName(String name) {
-        return fishRepository.findByNameContaining(name);
+        return fishMapper.findByNameContaining(name);
     }
 }

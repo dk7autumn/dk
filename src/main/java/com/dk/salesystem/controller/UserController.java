@@ -26,9 +26,11 @@ public class UserController {
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('system:user:query')")
     public ApiResponse<User> getById(@PathVariable Long id) {
-        return userService.findById(id)
-                .map(ApiResponse::success)
-                .orElse(ApiResponse.error("用户不存在"));
+        User user = userService.findById(id);
+        if (user == null) {
+            return ApiResponse.error("用户不存在");
+        }
+        return ApiResponse.success(user);
     }
 
     @PostMapping

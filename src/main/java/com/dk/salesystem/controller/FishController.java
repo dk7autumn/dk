@@ -26,9 +26,11 @@ public class FishController {
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('fish:query')")
     public ApiResponse<Fish> getById(@PathVariable Long id) {
-        return fishService.findById(id)
-                .map(ApiResponse::success)
-                .orElse(ApiResponse.error("鱼类不存在"));
+        Fish fish = fishService.findById(id);
+        if (fish == null) {
+            return ApiResponse.error("鱼类不存在");
+        }
+        return ApiResponse.success(fish);
     }
 
     @PostMapping

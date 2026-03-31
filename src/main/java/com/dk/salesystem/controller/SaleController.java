@@ -35,11 +35,13 @@ public class SaleController {
     @PostMapping
     @PreAuthorize("hasAuthority('sale:add')")
     public ApiResponse<SaleRecord> add(@RequestBody SaleRecordRequest request) {
-        Fish fish = fishService.findById(request.getFishId())
-                .orElseThrow(() -> new RuntimeException("鱼类不存在"));
+        Fish fish = fishService.findById(request.getFishId());
+        if (fish == null) {
+            throw new RuntimeException("鱼类不存在");
+        }
 
         SaleRecord record = new SaleRecord();
-        record.setFish(fish);
+        record.setFishId(fish.getId());
         record.setQuantity(request.getQuantity());
         record.setTotalPrice(fish.getPrice().multiply(BigDecimal.valueOf(request.getQuantity())));
         record.setSaleDate(request.getSaleDate());

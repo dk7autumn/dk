@@ -1,6 +1,6 @@
 package com.dk.salesystem.entity;
 
-import jakarta.persistence.*;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,62 +13,44 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
-@Entity
-@Table(name = "user")
+@TableName("user")
 public class User implements UserDetails {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @TableId(type = IdType.AUTO)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 50)
+    @TableField(value = "username", exist = true)
     private String username;
 
-    @Column(nullable = false)
+    @TableField(value = "password", exist = true)
     private String password;
 
-    @Column(length = 100)
+    @TableField(value = "email", exist = true)
     private String email;
 
-    @Column(length = 20)
+    @TableField(value = "phone", exist = true)
     private String phone;
 
-    @Column(length = 50)
+    @TableField(value = "nickname", exist = true)
     private String nickname;
 
-    @Column(length = 255)
+    @TableField(value = "avatar", exist = true)
     private String avatar;
 
-    @Column(nullable = false)
+    @TableField(value = "status", exist = true)
     private Integer status = 1;
 
-    @Column(name = "created_at")
+    @TableField(value = "created_at", fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @TableField(value = "updated_at", fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
 
-    @Column(nullable = false)
+    @TableField(value = "deleted", exist = true)
     private Integer deleted = 0;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "user_role",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
+    @TableField(exist = false)
     private List<Role> roles = new ArrayList<>();
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
