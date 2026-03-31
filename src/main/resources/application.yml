@@ -20,7 +20,9 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Shanghai
+  main:
+    allow-circular-references: true
 
 jwt:
   secret: dk-sale-system-jwt-secret-key-2024-spring-boot-application
-  expiration: 86400000 # 24 hours
+  expiration: 86400000
