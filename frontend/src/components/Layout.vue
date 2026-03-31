@@ -1,33 +1,35 @@
 <template>
   <div class="layout-container">
-    <el-aside :width="isCollapse ? '64px' : '200px'" class="sidebar">
+    <el-aside :width="isCollapse ? '64px' : '220px'" class="sidebar">
       <div class="logo">
-        <span v-if="!isCollapse">水产销售系统</span>
-        <span v-else>水产</span>
+        <el-icon class="logo-icon"><WaterFilled /></el-icon>
+        <span v-if="!isCollapse" class="logo-text">水产销售系统</span>
       </div>
       <el-menu
         :default-active="activeMenu"
-        background-color="#304156"
-        text-color="#bfcbd9"
-        active-text-color="#409EFF"
+        class="side-menu"
+        background-color="transparent"
+        text-color="#cbd5e1"
+        active-text-color="#ffffff"
         :collapse="isCollapse"
         router
+        :collapse-transition="false"
       >
-        <el-menu-item index="/dashboard">
-          <el-icon><HomeFilled /></el-icon>
+        <el-menu-item index="/dashboard" class="menu-item">
+          <el-icon class="menu-icon"><HomeFilled /></el-icon>
           <span>首页</span>
         </el-menu-item>
-        <el-menu-item index="/fish">
-          <el-icon><Shop /></el-icon>
+        <el-menu-item index="/fish" class="menu-item">
+          <el-icon class="menu-icon"><Shop /></el-icon>
           <span>鱼类管理</span>
         </el-menu-item>
-        <el-menu-item index="/sale">
-          <el-icon><ShoppingCart /></el-icon>
+        <el-menu-item index="/sale" class="menu-item">
+          <el-icon class="menu-icon"><ShoppingCart /></el-icon>
           <span>销售记录</span>
         </el-menu-item>
-        <el-sub-menu index="system">
+        <el-sub-menu index="system" class="menu-item">
           <template #title>
-            <el-icon><Setting /></el-icon>
+            <el-icon class="menu-icon"><Setting /></el-icon>
             <span>系统管理</span>
           </template>
           <el-menu-item index="/system/user" v-if="hasPermission('system:user:menu')">
@@ -51,18 +53,26 @@
           <el-icon class="collapse-btn" @click="toggleCollapse">
             <component :is="isCollapse ? 'Expand' : 'Fold'" />
           </el-icon>
+          <el-breadcrumb separator="/">
+            <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+            <el-breadcrumb-item v-if="route.path !== '/dashboard'">{{ breadcrumbTitle }}</el-breadcrumb-item>
+          </el-breadcrumb>
         </div>
         <div class="header-right">
           <el-dropdown @command="handleCommand">
             <span class="user-info">
-              <el-avatar :size="32" :src="userStore.userInfo?.avatar" class="avatar">
-                {{ userStore.userInfo?.nickname?.charAt(0) || 'U' }}
+              <el-avatar :size="36" class="avatar">
+                {{ userStore.userInfo?.nickname?.charAt(0).toUpperCase() || 'U' }}
               </el-avatar>
               <span class="username">{{ userStore.userInfo?.nickname || userStore.userInfo?.username }}</span>
+              <el-icon class="arrow-icon"><ArrowDown /></el-icon>
             </span>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="logout">退出登录</el-dropdown-item>
+                <el-dropdown-item command="logout">
+                  <el-icon><SwitchButton /></el-icon>
+                  退出登录
+                </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -80,7 +90,10 @@ import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
 import { ElMessageBox } from 'element-plus'
-import { HomeFilled, Shop, ShoppingCart, Setting, User, Avatar, Lock, Expand, Fold } from '@element-plus/icons-vue'
+import {
+  HomeFilled, Shop, ShoppingCart, Setting, User, Avatar, Lock,
+  Expand, Fold, ArrowDown, SwitchButton, WaterFilled
+} from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -88,6 +101,17 @@ const userStore = useUserStore()
 
 const isCollapse = ref(false)
 const activeMenu = computed(() => route.path)
+
+const breadcrumbTitle = computed(() => {
+  const titles = {
+    '/fish': '鱼类管理',
+    '/sale': '销售记录',
+    '/system/user': '用户管理',
+    '/system/role': '角色管理',
+    '/system/permission': '权限管理'
+  }
+  return titles[route.path] || ''
+})
 
 const toggleCollapse = () => {
   isCollapse.value = !isCollapse.value
@@ -118,51 +142,95 @@ const handleCommand = async (command) => {
 .layout-container {
   display: flex;
   height: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #f3f4f6;
 }
 
 .sidebar {
-  background-color: #304156;
-  transition: width 0.3s;
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  transition: width 0.3s ease;
   overflow-x: hidden;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
 }
 
 .logo {
-  height: 60px;
+  height: 70px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  font-size: 18px;
-  font-weight: bold;
-  background-color: #2b3a4b;
+  gap: 12px;
+  padding: 0 20px;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
-.el-menu {
+.logo-icon {
+  font-size: 28px;
+  color: #fff;
+}
+
+.logo-text {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.side-menu {
   border-right: none;
+  padding-top: 16px;
+}
+
+.menu-item {
+  margin: 4px 12px;
+  padding: 0 16px !important;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.menu-item:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  transform: translateX(4px);
+}
+
+.menu-item.is-active {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+}
+
+.menu-icon {
+  font-size: 20px;
+  margin-right: 12px;
 }
 
 .header {
-  background-color: #fff;
-  border-bottom: 1px solid #e6e6e6;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .header-left {
   display: flex;
   align-items: center;
+  gap: 20px;
 }
 
 .collapse-btn {
-  font-size: 20px;
+  font-size: 22px;
   cursor: pointer;
-  transition: color 0.3s;
+  transition: all 0.3s ease;
+  color: #64748b;
+  padding: 8px;
+  border-radius: 8px;
 }
 
 .collapse-btn:hover {
-  color: #409EFF;
+  color: #6366f1;
+  background: #f1f5f9;
 }
 
 .header-right {
@@ -173,19 +241,35 @@ const handleCommand = async (command) => {
 .user-info {
   display: flex;
   align-items: center;
+  gap: 10px;
   cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 24px;
+  transition: all 0.3s ease;
+}
+
+.user-info:hover {
+  background: #f1f5f9;
 }
 
 .avatar {
-  margin-right: 10px;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
 }
 
 .username {
-  color: #606266;
+  color: #334155;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.arrow-icon {
+  color: #94a3b8;
+  font-size: 16px;
 }
 
 .main-content {
-  background-color: #f5f7fa;
-  padding: 20px;
+  background-color: #f8fafc;
+  padding: 24px;
+  overflow-y: auto;
 }
 </style>

@@ -44,15 +44,24 @@
       </el-form>
 
       <el-table :data="saleList" style="width: 100%" v-loading="loading">
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="fish.name" label="鱼类名称" />
-        <el-table-column prop="quantity" label="数量" width="100" />
-        <el-table-column prop="totalPrice" label="总价" width="100">
+        <el-table-column label="鱼类名称">
           <template #default="{ row }">
-            ¥{{ row.totalPrice }}
+            {{ row.fish?.name || '未知鱼类' }}
           </template>
         </el-table-column>
-        <el-table-column prop="saleDate" label="销售日期" width="120" />
+        <el-table-column prop="unitPrice" label="单价" width="100">
+          <template #default="{ row }">
+            ¥{{ row.unitPrice }} 元/斤
+          </template>
+        </el-table-column>
+        <el-table-column prop="quantity" label="斤数" width="100" />
+        <el-table-column prop="totalPrice" label="销售额" width="120">
+          <template #default="{ row }">
+            ¥{{ row.totalPrice }} 元
+          </template>
+        </el-table-column>
+        <el-table-column prop="saleDatetime" label="销售时间" width="160" />
+        <el-table-column prop="remark" label="备注" min-width="150" show-overflow-tooltip />
         <el-table-column label="操作" width="100" v-if="hasPermission('sale:delete')">
           <template #default="{ row }">
             <el-button type="danger" size="small" @click="handleDelete(row)">
@@ -83,7 +92,7 @@
     >
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="鱼类" prop="fishId">
-          <el-select v-model="form.fishId" placeholder="请选择鱼类" style="width: 100%">
+          <el-select v-model="form.fishId" placeholder="请选择鱼类" style="width: 100%" @change="handleFishChange">
             <el-option
               v-for="fish in fishOptions"
               :key="fish.id"
@@ -92,17 +101,24 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="数量" prop="quantity">
-          <el-input-number v-model="form.quantity" :min="1" :step="1" style="width: 100%" />
+        <el-form-item label="单价" prop="unitPrice">
+          <el-input-number v-model="form.unitPrice" :min="0" :step="0.1" :precision="2" style="width: 100%" />
         </el-form-item>
-        <el-form-item label="销售日期" prop="saleDate">
+        <el-form-item label="数量" prop="quantity">
+          <el-input-number v-model="form.quantity" :min="0.01" :step="0.1" :precision="2" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="销售时间" prop="saleDatetime">
           <el-date-picker
-            v-model="form.saleDate"
-            type="date"
-            placeholder="选择日期"
+            v-model="form.saleDatetime"
+            type="datetime"
+            placeholder="选择日期时间"
             style="width: 100%"
-            value-format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            :default-value="new Date()"
           />
+        </el-form-item>
+        <el-form-item label="备注" prop="remark">
+          <el-input v-model="form.remark" type="textarea" :rows="2" placeholder="请输入备注" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -146,14 +162,27 @@ const pagination = reactive({
 const formRef = ref(null)
 const form = reactive({
   fishId: null,
-  quantity: 1,
-  saleDate: new Date().toISOString().split('T')[0]
+  unitPrice: 0,
+  quantity: 0,
+  saleDatetime: new Date().toISOString().slice(0, 19).replace('T', ' '),
+  remark: ''
 })
 
 const rules = {
   fishId: [{ required: true, message: '请选择鱼类', trigger: 'change' }],
   quantity: [{ required: true, message: '请输入数量', trigger: 'blur' }],
-  saleDate: [{ required: true, message: '请选择日期', trigger: 'change' }]
+  saleDatetime: [{ required: true, message: '请选择销售时间', trigger: 'change' }]
+}
+
+// 鱼类地图，用于快速获取鱼类信息
+const fishMap = ref(new Map())
+
+// 选择鱼类时自动填充单价
+const handleFishChange = (fishId) => {
+  const fish = fishMap.value.get(fishId)
+  if (fish) {
+    form.unitPrice = parseFloat(fish.price)
+  }
 }
 
 const loadData = async () => {
@@ -174,7 +203,13 @@ const loadData = async () => {
     pagination.total = saleRes.data.total
     pagination.page = saleRes.data.page
     pagination.size = saleRes.data.size
+
+    // 构建鱼类地图
+    fishMap.value = new Map()
     fishOptions.value = fishRes.data
+    fishRes.data.forEach(fish => {
+      fishMap.value.set(fish.id, fish)
+    })
   } catch (error) {
     console.error('加载失败:', error)
   } finally {
@@ -205,8 +240,10 @@ const handleReset = () => {
 
 const handleAdd = () => {
   form.fishId = null
-  form.quantity = 1
-  form.saleDate = new Date().toISOString().split('T')[0]
+  form.unitPrice = 0
+  form.quantity = 0
+  form.saleDatetime = new Date().toISOString().slice(0, 19).replace('T', ' ')
+  form.remark = ''
   dialogVisible.value = true
 }
 

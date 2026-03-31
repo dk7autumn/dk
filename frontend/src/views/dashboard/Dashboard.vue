@@ -3,15 +3,15 @@
     <el-row :gutter="20">
       <!-- 今日统计卡片 -->
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card">
+        <el-card shadow="hover" class="stat-card" @click="showFishPieChart('today')">
           <div class="stat-content">
             <div class="stat-icon today">
               <el-icon><Sunny /></el-icon>
             </div>
             <div class="stat-info">
               <div class="stat-title">今日销售额</div>
-              <div class="stat-value">¥{{ todayStats.totalAmount || 0 }}</div>
-              <div class="stat-subtitle">售出 {{ todayStats.totalQuantity || 0 }} 件</div>
+              <div class="stat-value">¥{{ todayStats.totalAmount || 0 }} 元</div>
+              <div class="stat-subtitle">售出 {{ todayStats.totalQuantity || 0 }} 斤</div>
             </div>
           </div>
         </el-card>
@@ -19,15 +19,15 @@
 
       <!-- 本周统计卡片 -->
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card">
+        <el-card shadow="hover" class="stat-card" @click="showFishPieChart('week')">
           <div class="stat-content">
             <div class="stat-icon week">
               <el-icon><Calendar /></el-icon>
             </div>
             <div class="stat-info">
               <div class="stat-title">本周销售额</div>
-              <div class="stat-value">¥{{ weekStats.totalAmount || 0 }}</div>
-              <div class="stat-subtitle">售出 {{ weekStats.totalQuantity || 0 }} 件</div>
+              <div class="stat-value">¥{{ weekStats.totalAmount || 0 }} 元</div>
+              <div class="stat-subtitle">售出 {{ weekStats.totalQuantity || 0 }} 斤</div>
             </div>
           </div>
         </el-card>
@@ -35,15 +35,15 @@
 
       <!-- 本月统计卡片 -->
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card">
+        <el-card shadow="hover" class="stat-card" @click="showFishPieChart('month')">
           <div class="stat-content">
             <div class="stat-icon month">
               <el-icon><Clock /></el-icon>
             </div>
             <div class="stat-info">
               <div class="stat-title">本月销售额</div>
-              <div class="stat-value">¥{{ monthStats.totalAmount || 0 }}</div>
-              <div class="stat-subtitle">售出 {{ monthStats.totalQuantity || 0 }} 件</div>
+              <div class="stat-value">¥{{ monthStats.totalAmount || 0 }} 元</div>
+              <div class="stat-subtitle">售出 {{ monthStats.totalQuantity || 0 }} 斤</div>
             </div>
           </div>
         </el-card>
@@ -51,15 +51,15 @@
 
       <!-- 本年统计卡片 -->
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card">
+        <el-card shadow="hover" class="stat-card" @click="showFishPieChart('year')">
           <div class="stat-content">
             <div class="stat-icon year">
               <el-icon><Timer /></el-icon>
             </div>
             <div class="stat-info">
               <div class="stat-title">本年销售额</div>
-              <div class="stat-value">¥{{ yearStats.totalAmount || 0 }}</div>
-              <div class="stat-subtitle">售出 {{ yearStats.totalQuantity || 0 }} 件</div>
+              <div class="stat-value">¥{{ yearStats.totalAmount || 0 }} 元</div>
+              <div class="stat-subtitle">售出 {{ yearStats.totalQuantity || 0 }} 斤</div>
             </div>
           </div>
         </el-card>
@@ -103,21 +103,39 @@
           <el-table :data="fishRankList" style="width: 100%" :show-header="true">
             <el-table-column type="index" label="排名" width="80" />
             <el-table-column prop="fishName" label="鱼类名称" />
-            <el-table-column prop="totalQuantity" label="销售数量" sortable />
+            <el-table-column prop="totalQuantity" label="销售斤数" sortable />
             <el-table-column prop="totalAmount" label="销售金额" sortable>
               <template #default="{ row }">
-                ¥{{ row.totalAmount }}
+                ¥{{ row.totalAmount }} 元
               </template>
             </el-table-column>
           </el-table>
         </el-card>
       </el-col>
     </el-row>
+
+    <!-- 鱼类占比饼图对话框 -->
+    <el-dialog
+      v-model="pieDialogVisible"
+      :title="pieDialogTitle"
+      width="800px"
+    >
+      <el-row :gutter="20">
+        <el-col :span="12">
+          <div style="text-align: center; font-weight: bold; margin-bottom: 10px">销售斤数占比</div>
+          <div ref="quantityPieRef" style="height: 350px"></div>
+        </el-col>
+        <el-col :span="12">
+          <div style="text-align: center; font-weight: bold; margin-bottom: 10px">销售额占比</div>
+          <div ref="amountPieRef" style="height: 350px"></div>
+        </el-col>
+      </el-row>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, nextTick } from 'vue'
+import { ref, reactive, onMounted, nextTick, watch } from 'vue'
 import { Sunny, Calendar, Clock, Timer } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import { getDailyStats, getWeeklyStats, getMonthlyStats, getYearlyStats, getSaleList } from '@/api/sale'
@@ -134,6 +152,161 @@ const fishRankList = ref([])
 
 let dailyChart = null
 let monthlyChart = null
+let quantityPieChart = null
+let amountPieChart = null
+
+// 饼图相关
+const pieDialogVisible = ref(false)
+const pieDialogTitle = ref('')
+const quantityPieRef = ref(null)
+const amountPieRef = ref(null)
+
+// 获取指定时间段的鱼类销售数据
+const getFishSalesData = async (startDate, endDate) => {
+  const res = await getSaleList({
+    page: 1,
+    size: 1000,
+    startDate,
+    endDate
+  })
+
+  const fishMap = new Map()
+  res.data.records.forEach(record => {
+    const fishId = record.fish?.id || record.fishId
+    const fishName = record.fish?.name || '未知鱼类'
+    if (!fishMap.has(fishId)) {
+      fishMap.set(fishId, { fishId, fishName, totalQuantity: 0, totalAmount: 0 })
+    }
+    const item = fishMap.get(fishId)
+    item.totalQuantity = parseFloat(item.totalQuantity) + parseFloat(record.quantity || 0)
+    item.totalAmount += parseFloat(record.totalPrice)
+  })
+
+  return Array.from(fishMap.values())
+}
+
+// 显示鱼类占比饼图
+const showFishPieChart = async (type) => {
+  const today = new Date()
+  let startDate, endDate, title
+
+  switch (type) {
+    case 'today':
+      startDate = today.toISOString().split('T')[0]
+      endDate = startDate
+      title = '今日鱼类销售占比'
+      break
+    case 'week':
+      const dayOfWeek = today.getDay() || 7
+      const monday = new Date(today)
+      monday.setDate(today.getDate() - dayOfWeek + 1)
+      startDate = monday.toISOString().split('T')[0]
+      endDate = today.toISOString().split('T')[0]
+      title = '本周鱼类销售占比'
+      break
+    case 'month':
+      const year = today.getFullYear()
+      const month = today.getMonth() + 1
+      startDate = `${year}-${String(month).padStart(2, '0')}-01`
+      endDate = `${year}-${String(month).padStart(2, '0')}-${String(new Date(year, month, 0).getDate()).padStart(2, '0')}`
+      title = '本月鱼类销售占比'
+      break
+    case 'year':
+      const currentYear = today.getFullYear()
+      startDate = `${currentYear}-01-01`
+      endDate = `${currentYear}-12-31`
+      title = '本年鱼类销售占比'
+      break
+  }
+
+  pieDialogTitle.value = title
+  pieDialogVisible.value = true
+
+  // 等待对话框打开后渲染图表
+  nextTick(async () => {
+    const fishData = await getFishSalesData(startDate, endDate)
+
+    // 创建按斤数占比的数据
+    const quantityData = fishData.map(item => ({
+      name: item.fishName,
+      value: parseFloat(item.totalQuantity.toFixed(2))
+    }))
+
+    // 创建按金额占比的数据
+    const amountData = fishData.map(item => ({
+      name: item.fishName,
+      value: parseFloat(item.totalAmount.toFixed(2))
+    }))
+
+    // 渲染斤数占比饼图
+    if (quantityPieRef.value) {
+      quantityPieChart = echarts.init(quantityPieRef.value)
+      quantityPieChart.setOption({
+        tooltip: {
+          trigger: 'item',
+          formatter: '{b}: {c}斤 ({d}%)'
+        },
+        legend: {
+          orient: 'vertical',
+          left: 'left',
+          top: 'middle'
+        },
+        series: [
+          {
+            name: '销售斤数',
+            type: 'pie',
+            radius: '60%',
+            data: quantityData,
+            emphasis: {
+              itemStyle: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.5)'
+              }
+            },
+            label: {
+              formatter: '{b}\n{c}斤'
+            }
+          }
+        ]
+      })
+    }
+
+    // 渲染销售额占比饼图
+    if (amountPieRef.value) {
+      amountPieChart = echarts.init(amountPieRef.value)
+      amountPieChart.setOption({
+        tooltip: {
+          trigger: 'item',
+          formatter: '{b}: ¥{c} 元 ({d}%)'
+        },
+        legend: {
+          orient: 'vertical',
+          left: 'left',
+          top: 'middle'
+        },
+        series: [
+          {
+            name: '销售额',
+            type: 'pie',
+            radius: '60%',
+            data: amountData,
+            emphasis: {
+              itemStyle: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.5)'
+              }
+            },
+            label: {
+              formatter: '{b}\n¥{c} 元'
+            }
+          }
+        ]
+      })
+    }
+  })
+}
 
 const loadStats = async () => {
   const today = new Date().toISOString().split('T')[0]
@@ -293,26 +466,9 @@ const loadFishRank = async () => {
     const monthStart = `${year}-${String(month).padStart(2, '0')}-01`
     const monthEnd = `${year}-${String(month).padStart(2, '0')}-${String(new Date(year, month, 0).getDate()).padStart(2, '0')}`
 
-    const res = await getSaleList({
-      page: 1,
-      size: 100,
-      startDate: monthStart,
-      endDate: monthEnd
-    })
+    const fishData = await getFishSalesData(monthStart, monthEnd)
 
-    const fishMap = new Map()
-    res.data.records.forEach(record => {
-      const fishId = record.fish?.id || record.fishId
-      const fishName = record.fish?.name || '未知鱼类'
-      if (!fishMap.has(fishId)) {
-        fishMap.set(fishId, { fishId, fishName, totalQuantity: 0, totalAmount: 0 })
-      }
-      const item = fishMap.get(fishId)
-      item.totalQuantity += record.quantity
-      item.totalAmount += parseFloat(record.totalPrice)
-    })
-
-    fishRankList.value = Array.from(fishMap.values())
+    fishRankList.value = fishData
       .sort((a, b) => b.totalQuantity - a.totalQuantity)
       .slice(0, 10)
 
@@ -331,7 +487,19 @@ onMounted(() => {
   window.addEventListener('resize', () => {
     dailyChart?.resize()
     monthlyChart?.resize()
+    quantityPieChart?.resize()
+    amountPieChart?.resize()
   })
+})
+
+// 对话框关闭时销毁图表
+watch(pieDialogVisible, (val) => {
+  if (!val) {
+    quantityPieChart?.dispose()
+    amountPieChart?.dispose()
+    quantityPieChart = null
+    amountPieChart = null
+  }
 })
 </script>
 

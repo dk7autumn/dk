@@ -6,21 +6,15 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
 public interface SaleRecordMapper extends BaseMapper<SaleRecord> {
 
-    @Select("SELECT * FROM sale_record WHERE sale_date = #{date}")
-    List<SaleRecord> findBySaleDate(@Param("date") LocalDate date);
+    @Select("SELECT * FROM sale_record WHERE sale_datetime >= #{start} AND sale_datetime <= #{end}")
+    List<SaleRecord> findBySaleDateTimeBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
-    @Select("SELECT * FROM sale_record WHERE sale_date BETWEEN #{start} AND #{end}")
-    List<SaleRecord> findBySaleDateBetween(@Param("start") LocalDate start, @Param("end") LocalDate end);
-
-    @Select("SELECT SUM(total_price) FROM sale_record WHERE sale_date = #{date}")
-    java.math.BigDecimal sumBySaleDate(@Param("date") LocalDate date);
-
-    @Select("SELECT SUM(total_price) FROM sale_record WHERE sale_date BETWEEN #{start} AND #{end}")
-    java.math.BigDecimal sumBySaleDateBetween(@Param("start") LocalDate start, @Param("end") LocalDate end);
+    @Select("SELECT SUM(total_price) FROM sale_record WHERE sale_datetime >= #{start} AND sale_datetime <= #{end}")
+    java.math.BigDecimal sumBySaleDateTimeBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 }

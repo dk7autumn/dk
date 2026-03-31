@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @TableName("sale_record")
@@ -20,13 +20,19 @@ public class SaleRecord {
     private Long fishId;
 
     @TableField(value = "quantity")
-    private Integer quantity;
+    private BigDecimal quantity;
+
+    @TableField(value = "unit_price")
+    private BigDecimal unitPrice;
 
     @TableField(value = "total_price")
     private BigDecimal totalPrice;
 
-    @TableField(value = "sale_date")
-    private LocalDate saleDate;
+    @TableField(value = "sale_datetime")
+    private LocalDateTime saleDatetime;
+
+    @TableField(value = "remark")
+    private String remark;
 
     @TableField(exist = false)
     private Fish fish;

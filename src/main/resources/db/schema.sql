@@ -78,11 +78,13 @@ CREATE TABLE IF NOT EXISTS `fish` (
 CREATE TABLE IF NOT EXISTS `sale_record` (
     `id` BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '销售记录 ID',
     `fish_id` BIGINT NOT NULL COMMENT '鱼类 ID',
-    `quantity` INT NOT NULL COMMENT '数量',
+    `quantity` DECIMAL(10,2) NOT NULL COMMENT '数量',
+    `unit_price` DECIMAL(10,2) NOT NULL COMMENT '单价',
     `total_price` DECIMAL(10,2) NOT NULL COMMENT '总金额',
-    `sale_date` DATE NOT NULL COMMENT '销售日期',
+    `sale_datetime` DATETIME NOT NULL COMMENT '销售时间',
+    `remark` VARCHAR(255) COMMENT '备注',
     KEY `idx_fish_id` (`fish_id`),
-    KEY `idx_sale_date` (`sale_date`)
+    KEY `idx_sale_datetime` (`sale_datetime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='销售记录表';
 
 -- 初始化数据 - 角色

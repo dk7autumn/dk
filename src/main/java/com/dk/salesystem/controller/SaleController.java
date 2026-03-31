@@ -7,6 +7,7 @@ import com.dk.salesystem.entity.Fish;
 import com.dk.salesystem.entity.SaleRecord;
 import com.dk.salesystem.service.FishService;
 import com.dk.salesystem.service.SaleService;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -45,12 +47,6 @@ public class SaleController {
         ));
     }
 
-    @GetMapping("/fish-list")
-    @PreAuthorize("hasAuthority('sale:query')")
-    public ApiResponse<List<Fish>> getFishList() {
-        return ApiResponse.success(fishService.findAll());
-    }
-
     @PostMapping
     @PreAuthorize("hasAuthority('sale:add')")
     public ApiResponse<SaleRecord> add(@RequestBody SaleRecordRequest request) {
@@ -59,11 +55,17 @@ public class SaleController {
             throw new RuntimeException("鱼类不存在");
         }
 
+        // 使用请求中的单价，如果没有则使用鱼类当前单价
+        BigDecimal unitPrice = request.getUnitPrice() != null ? request.getUnitPrice() : fish.getPrice();
+        BigDecimal totalPrice = unitPrice.multiply(request.getQuantity());
+
         SaleRecord record = new SaleRecord();
         record.setFishId(fish.getId());
         record.setQuantity(request.getQuantity());
-        record.setTotalPrice(fish.getPrice().multiply(BigDecimal.valueOf(request.getQuantity())));
-        record.setSaleDate(request.getSaleDate());
+        record.setUnitPrice(unitPrice);
+        record.setTotalPrice(totalPrice);
+        record.setSaleDatetime(request.getSaleDatetime() != null ? request.getSaleDatetime() : LocalDateTime.now());
+        record.setRemark(request.getRemark());
 
         return ApiResponse.success(saleService.save(record));
     }
@@ -112,14 +114,21 @@ public class SaleController {
     // 内部类用于接收请求参数
     public static class SaleRecordRequest {
         private Long fishId;
-        private Integer quantity;
-        private LocalDate saleDate;
+        private BigDecimal quantity;
+        private BigDecimal unitPrice;
+        private String remark;
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
+        private LocalDateTime saleDatetime;
 
         public Long getFishId() { return fishId; }
         public void setFishId(Long fishId) { this.fishId = fishId; }
-        public Integer getQuantity() { return quantity; }
-        public void setQuantity(Integer quantity) { this.quantity = quantity; }
-        public LocalDate getSaleDate() { return saleDate; }
-        public void setSaleDate(LocalDate saleDate) { this.saleDate = saleDate; }
+        public BigDecimal getQuantity() { return quantity; }
+        public void setQuantity(BigDecimal quantity) { this.quantity = quantity; }
+        public BigDecimal getUnitPrice() { return unitPrice; }
+        public void setUnitPrice(BigDecimal unitPrice) { this.unitPrice = unitPrice; }
+        public String getRemark() { return remark; }
+        public void setRemark(String remark) { this.remark = remark; }
+        public LocalDateTime getSaleDatetime() { return saleDatetime; }
+        public void setSaleDatetime(LocalDateTime saleDatetime) { this.saleDatetime = saleDatetime; }
     }
 }
