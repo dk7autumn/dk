@@ -106,6 +106,10 @@ INSERT INTO `permission` (`name`, `code`, `type`, `parent_id`, `path`, `icon`, `
 ('角色编辑', 'system:role:edit', 2, 7, NULL, NULL, 0, 1),
 ('角色删除', 'system:role:delete', 2, 7, NULL, NULL, 0, 1),
 ('权限管理', 'system:permission:menu', 1, 1, '/system/permission', 'permission', 3, 1),
+('权限查询', 'system:permission:query', 3, 12, NULL, NULL, 0, 1),
+('权限新增', 'system:permission:add', 2, 12, NULL, NULL, 0, 1),
+('权限编辑', 'system:permission:edit', 2, 12, NULL, NULL, 0, 1),
+('权限删除', 'system:permission:delete', 2, 12, NULL, NULL, 0, 1),
 -- 鱼类管理模块
 ('鱼类管理', 'fish:menu', 1, 0, '/fish', 'fish', 1, 1),
 ('鱼类查询', 'fish:query', 3, 13, NULL, NULL, 0, 1),
