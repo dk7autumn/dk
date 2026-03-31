@@ -1,6 +1,8 @@
 package com.dk.salesystem.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dk.salesystem.dto.ApiResponse;
+import com.dk.salesystem.dto.PageResult;
 import com.dk.salesystem.entity.Fish;
 import com.dk.salesystem.entity.SaleRecord;
 import com.dk.salesystem.service.FishService;
@@ -28,8 +30,25 @@ public class SaleController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('sale:query')")
-    public ApiResponse<List<SaleRecord>> list() {
-        return ApiResponse.success(saleService.findAll());
+    public ApiResponse<PageResult<SaleRecord>> list(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Long fishId,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
+        Page<SaleRecord> pageResult = saleService.findPage(page, size, fishId, startDate, endDate);
+        return ApiResponse.success(PageResult.of(
+            pageResult.getRecords(),
+            pageResult.getTotal(),
+            (int) pageResult.getCurrent(),
+            (int) pageResult.getSize()
+        ));
+    }
+
+    @GetMapping("/fish-list")
+    @PreAuthorize("hasAuthority('sale:query')")
+    public ApiResponse<List<Fish>> getFishList() {
+        return ApiResponse.success(fishService.findAll());
     }
 
     @PostMapping

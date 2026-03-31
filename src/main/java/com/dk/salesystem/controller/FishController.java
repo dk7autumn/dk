@@ -1,13 +1,13 @@
 package com.dk.salesystem.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dk.salesystem.dto.ApiResponse;
+import com.dk.salesystem.dto.PageResult;
 import com.dk.salesystem.entity.Fish;
 import com.dk.salesystem.service.FishService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/fish")
@@ -19,8 +19,17 @@ public class FishController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('fish:query')")
-    public ApiResponse<List<Fish>> list() {
-        return ApiResponse.success(fishService.findAll());
+    public ApiResponse<PageResult<Fish>> list(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String name) {
+        Page<Fish> pageResult = fishService.findPage(page, size, name);
+        return ApiResponse.success(PageResult.of(
+            pageResult.getRecords(),
+            pageResult.getTotal(),
+            (int) pageResult.getCurrent(),
+            (int) pageResult.getSize()
+        ));
     }
 
     @GetMapping("/{id}")

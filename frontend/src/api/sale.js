@@ -1,8 +1,16 @@
 import request from './request'
 
-export function getSaleList() {
+export function getSaleList(params) {
   return request({
     url: '/sale',
+    method: 'get',
+    params
+  })
+}
+
+export function getFishList() {
+  return request({
+    url: '/sale/fish-list',
     method: 'get'
   })
 }

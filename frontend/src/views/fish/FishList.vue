@@ -10,6 +10,21 @@
         </div>
       </template>
 
+      <!-- 搜索栏 -->
+      <el-form :inline="true" :model="searchForm" class="search-form">
+        <el-form-item label="名称">
+          <el-input v-model="searchForm.name" placeholder="请输入鱼类名称" clearable style="width: 200px" />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handleSearch">
+            <el-icon><Search /></el-icon> 查询
+          </el-button>
+          <el-button @click="handleReset">
+            <el-icon><Refresh /></el-icon> 重置
+          </el-button>
+        </el-form-item>
+      </el-form>
+
       <el-table :data="fishList" style="width: 100%" v-loading="loading">
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="name" label="名称" />
@@ -31,6 +46,18 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <!-- 分页 -->
+      <el-pagination
+        v-model:current-page="pagination.page"
+        v-model:page-size="pagination.size"
+        :page-sizes="[10, 20, 50, 100]"
+        :total="pagination.total"
+        layout="total, sizes, prev, pager, next, jumper"
+        @size-change="loadFishList"
+        @current-change="loadFishList"
+        class="pagination"
+      />
     </el-card>
 
     <!-- 新增/编辑对话框 -->
@@ -64,6 +91,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Plus, Search, Refresh } from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/user'
 import { getFishList, addFish, updateFish, deleteFish } from '@/api/fish'
 
@@ -75,6 +103,16 @@ const loading = ref(false)
 const dialogVisible = ref(false)
 const isEdit = ref(false)
 const submitting = ref(false)
+
+const searchForm = reactive({
+  name: ''
+})
+
+const pagination = reactive({
+  page: 1,
+  size: 10,
+  total: 0
+})
 
 const formRef = ref(null)
 const form = reactive({
@@ -93,13 +131,31 @@ const rules = {
 const loadFishList = async () => {
   loading.value = true
   try {
-    const res = await getFishList()
-    fishList.value = res.data
+    const res = await getFishList({
+      page: pagination.page,
+      size: pagination.size,
+      name: searchForm.name || undefined
+    })
+    fishList.value = res.data.records
+    pagination.total = res.data.total
+    pagination.page = res.data.page
+    pagination.size = res.data.size
   } catch (error) {
     console.error('加载失败:', error)
   } finally {
     loading.value = false
   }
+}
+
+const handleSearch = () => {
+  pagination.page = 1
+  loadFishList()
+}
+
+const handleReset = () => {
+  searchForm.name = ''
+  pagination.page = 1
+  loadFishList()
 }
 
 const handleAdd = () => {
@@ -178,5 +234,15 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.search-form {
+  margin-bottom: 20px;
+}
+
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

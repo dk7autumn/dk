@@ -10,6 +10,39 @@
         </div>
       </template>
 
+      <!-- 搜索栏 -->
+      <el-form :inline="true" :model="searchForm" class="search-form">
+        <el-form-item label="鱼类">
+          <el-select v-model="searchForm.fishId" placeholder="选择鱼类" clearable style="width: 150px">
+            <el-option
+              v-for="fish in fishOptions"
+              :key="fish.id"
+              :label="fish.name"
+              :value="fish.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="日期范围">
+          <el-date-picker
+            v-model="dateRange"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            value-format="YYYY-MM-DD"
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handleSearch">
+            <el-icon><Search /></el-icon> 查询
+          </el-button>
+          <el-button @click="handleReset">
+            <el-icon><Refresh /></el-icon> 重置
+          </el-button>
+        </el-form-item>
+      </el-form>
+
       <el-table :data="saleList" style="width: 100%" v-loading="loading">
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="fish.name" label="鱼类名称" />
@@ -28,6 +61,18 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <!-- 分页 -->
+      <el-pagination
+        v-model:current-page="pagination.page"
+        v-model:page-size="pagination.size"
+        :page-sizes="[10, 20, 50, 100]"
+        :total="pagination.total"
+        layout="total, sizes, prev, pager, next, jumper"
+        @size-change="loadData"
+        @current-change="loadData"
+        class="pagination"
+      />
     </el-card>
 
     <!-- 新增对话框 -->
@@ -71,9 +116,9 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Plus, Search, Refresh } from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/user'
-import { getSaleList, addSale, deleteSale } from '@/api/sale'
-import { getFishList } from '@/api/fish'
+import { getSaleList, addSale, deleteSale, getFishList } from '@/api/sale'
 
 const userStore = useUserStore()
 const hasPermission = (permission) => userStore.hasPermission(permission)
@@ -83,6 +128,20 @@ const fishOptions = ref([])
 const loading = ref(false)
 const dialogVisible = ref(false)
 const submitting = ref(false)
+
+const searchForm = reactive({
+  fishId: null,
+  startDate: null,
+  endDate: null
+})
+
+const dateRange = ref([])
+
+const pagination = reactive({
+  page: 1,
+  size: 10,
+  total: 0
+})
 
 const formRef = ref(null)
 const form = reactive({
@@ -100,14 +159,48 @@ const rules = {
 const loadData = async () => {
   loading.value = true
   try {
-    const [saleRes, fishRes] = await Promise.all([getSaleList(), getFishList()])
-    saleList.value = saleRes.data
+    const params = {
+      page: pagination.page,
+      size: pagination.size,
+      fishId: searchForm.fishId || undefined,
+      startDate: searchForm.startDate || undefined,
+      endDate: searchForm.endDate || undefined
+    }
+    const [saleRes, fishRes] = await Promise.all([
+      getSaleList(params),
+      getFishList()
+    ])
+    saleList.value = saleRes.data.records
+    pagination.total = saleRes.data.total
+    pagination.page = saleRes.data.page
+    pagination.size = saleRes.data.size
     fishOptions.value = fishRes.data
   } catch (error) {
     console.error('加载失败:', error)
   } finally {
     loading.value = false
   }
+}
+
+const handleSearch = () => {
+  if (dateRange.value && dateRange.value.length === 2) {
+    searchForm.startDate = dateRange.value[0]
+    searchForm.endDate = dateRange.value[1]
+  } else {
+    searchForm.startDate = null
+    searchForm.endDate = null
+  }
+  pagination.page = 1
+  loadData()
+}
+
+const handleReset = () => {
+  searchForm.fishId = null
+  searchForm.startDate = null
+  searchForm.endDate = null
+  dateRange.value = []
+  pagination.page = 1
+  loadData()
 }
 
 const handleAdd = () => {
@@ -168,5 +261,15 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.search-form {
+  margin-bottom: 20px;
+}
+
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

@@ -1,5 +1,6 @@
 package com.dk.salesystem.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dk.salesystem.entity.SaleRecord;
 import com.dk.salesystem.mapper.SaleRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,22 @@ public class SaleService {
         return saleRecordMapper.selectList(null);
     }
 
-    public List<SaleRecord> findByDate(LocalDate date) {
-        return saleRecordMapper.findBySaleDate(date);
+    public Page<SaleRecord> findPage(int page, int size, Long fishId, LocalDate startDate, LocalDate endDate) {
+        Page<SaleRecord> pageParam = new Page<>(page, size);
+        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<SaleRecord> wrapper =
+            new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+
+        if (fishId != null) {
+            wrapper.eq("fish_id", fishId);
+        }
+        if (startDate != null) {
+            wrapper.ge("sale_date", startDate);
+        }
+        if (endDate != null) {
+            wrapper.le("sale_date", endDate);
+        }
+
+        return saleRecordMapper.selectPage(pageParam, wrapper);
     }
 
     public SaleRecord save(SaleRecord record) {
@@ -36,6 +51,10 @@ public class SaleService {
 
     public void deleteById(Long id) {
         saleRecordMapper.deleteById(id);
+    }
+
+    public List<SaleRecord> findByDate(LocalDate date) {
+        return saleRecordMapper.findBySaleDate(date);
     }
 
     public Map<String, Object> getDailyStats(LocalDate date) {

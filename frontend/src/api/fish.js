@@ -1,9 +1,10 @@
 import request from './request'
 
-export function getFishList() {
+export function getFishList(params) {
   return request({
     url: '/fish',
-    method: 'get'
+    method: 'get',
+    params
   })
 }
 
