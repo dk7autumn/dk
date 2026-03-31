@@ -10,17 +10,23 @@ const routes = [
   },
   {
     path: '/',
-    redirect: '/fish'
+    redirect: '/dashboard'
   },
   {
     path: '/layout',
     component: () => import('@/components/Layout.vue'),
     children: [
       {
+        path: '/dashboard',
+        name: 'Dashboard',
+        component: () => import('@/views/dashboard/Dashboard.vue'),
+        meta: { title: '首页', icon: 'HomeFilled' }
+      },
+      {
         path: '/fish',
         name: 'Fish',
         component: () => import('@/views/fish/FishList.vue'),
-        meta: { title: '鱼类管理', icon: 'Fish' }
+        meta: { title: '鱼类管理', icon: 'Basket' }
       },
       {
         path: '/sale',

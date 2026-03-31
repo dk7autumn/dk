@@ -13,17 +13,17 @@
         :collapse="isCollapse"
         router
       >
+        <el-menu-item index="/dashboard">
+          <el-icon><HomeFilled /></el-icon>
+          <span>首页</span>
+        </el-menu-item>
         <el-menu-item index="/fish">
-          <el-icon><Fish /></el-icon>
+          <el-icon><Shop /></el-icon>
           <span>鱼类管理</span>
         </el-menu-item>
         <el-menu-item index="/sale">
           <el-icon><ShoppingCart /></el-icon>
           <span>销售记录</span>
-        </el-menu-item>
-        <el-menu-item index="/stats">
-          <el-icon><DataAnalysis /></el-icon>
-          <span>统计分析</span>
         </el-menu-item>
         <el-sub-menu index="system">
           <template #title>
@@ -80,6 +80,7 @@ import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
 import { ElMessageBox } from 'element-plus'
+import { HomeFilled, Shop, ShoppingCart, Setting, User, Avatar, Lock, Expand, Fold } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()
