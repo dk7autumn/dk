@@ -1,46 +1,53 @@
 package com.dk.salesystem.controller;
 
+import com.dk.salesystem.dto.ApiResponse;
 import com.dk.salesystem.entity.Fish;
 import com.dk.salesystem.service.FishService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import java.math.BigDecimal;
+
 import java.util.List;
 
-@Controller
-@RequestMapping("/fish")
+@RestController
+@RequestMapping("/api/fish")
+@PreAuthorize("isAuthenticated()")
 public class FishController {
 
     @Autowired
     private FishService fishService;
 
     @GetMapping
-    public String listFish(Model model) {
-        model.addAttribute("fishList", fishService.findAll());
-        model.addAttribute("fish", new Fish());
-        return "fish/list";
+    @PreAuthorize("hasAuthority('fish:query')")
+    public ApiResponse<List<Fish>> list() {
+        return ApiResponse.success(fishService.findAll());
     }
 
-    @PostMapping("/add")
-    public String addFish(@ModelAttribute Fish fish) {
-        fishService.save(fish);
-        return "redirect:/fish";
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('fish:query')")
+    public ApiResponse<Fish> getById(@PathVariable Long id) {
+        return fishService.findById(id)
+                .map(ApiResponse::success)
+                .orElse(ApiResponse.error("鱼类不存在"));
     }
 
-    @GetMapping("/edit/{id}")
-    public String editFish(@PathVariable Long id, Model model) {
-        fishService.findById(id).ifPresent(fish -> {
-            model.addAttribute("fish", fish);
-            model.addAttribute("fishList", fishService.findAll());
-        });
-        return "fish/list";
+    @PostMapping
+    @PreAuthorize("hasAuthority('fish:add')")
+    public ApiResponse<Fish> add(@RequestBody Fish fish) {
+        return ApiResponse.success(fishService.save(fish));
     }
 
-    @GetMapping("/delete/{id}")
-    public String deleteFish(@PathVariable Long id) {
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('fish:edit')")
+    public ApiResponse<Fish> update(@PathVariable Long id, @RequestBody Fish fish) {
+        fish.setId(id);
+        return ApiResponse.success(fishService.save(fish));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('fish:delete')")
+    public ApiResponse<Void> delete(@PathVariable Long id) {
         fishService.deleteById(id);
-        return "redirect:/fish";
+        return ApiResponse.success();
     }
 }
