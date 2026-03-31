@@ -28,6 +28,10 @@ public class SaleService {
         return saleRecordRepository.save(record);
     }
 
+    public void deleteById(Long id) {
+        saleRecordRepository.deleteById(id);
+    }
+
     public Map<String, Object> getDailyStats(LocalDate date) {
         List<SaleRecord> records = saleRecordRepository.findBySaleDate(date);
         return calculateStats(records);
@@ -36,7 +40,7 @@ public class SaleService {
     public Map<String, Object> getWeeklyStats(LocalDate date) {
         LocalDate startOfWeek = date.minusDays(date.getDayOfWeek().getValue() - 1);
         LocalDate endOfWeek = startOfWeek.plusDays(6);
-        List<SaleRecord> records = saleRecordRepository.findByDateRange(startOfWeek, endOfWeek);
+        List<SaleRecord> records = saleRecordRepository.findBySaleDateBetween(startOfWeek, endOfWeek);
         Map<String, Object> stats = calculateStats(records);
         stats.put("startDate", startOfWeek);
         stats.put("endDate", endOfWeek);
@@ -46,7 +50,7 @@ public class SaleService {
     public Map<String, Object> getMonthlyStats(LocalDate date) {
         LocalDate startOfMonth = date.withDayOfMonth(1);
         LocalDate endOfMonth = startOfMonth.plusMonths(1).minusDays(1);
-        List<SaleRecord> records = saleRecordRepository.findByDateRange(startOfMonth, endOfMonth);
+        List<SaleRecord> records = saleRecordRepository.findBySaleDateBetween(startOfMonth, endOfMonth);
         Map<String, Object> stats = calculateStats(records);
         stats.put("startDate", startOfMonth);
         stats.put("endDate", endOfMonth);
@@ -59,7 +63,7 @@ public class SaleService {
         int startMonth = quarter * 3 + 1;
         LocalDate startOfQuarter = date.withMonth(startMonth).withDayOfMonth(1);
         LocalDate endOfQuarter = startOfQuarter.plusMonths(3).minusDays(1);
-        List<SaleRecord> records = saleRecordRepository.findByDateRange(startOfQuarter, endOfQuarter);
+        List<SaleRecord> records = saleRecordRepository.findBySaleDateBetween(startOfQuarter, endOfQuarter);
         Map<String, Object> stats = calculateStats(records);
         stats.put("startDate", startOfQuarter);
         stats.put("endDate", endOfQuarter);
@@ -70,7 +74,7 @@ public class SaleService {
     public Map<String, Object> getYearlyStats(int year) {
         LocalDate startOfYear = LocalDate.of(year, 1, 1);
         LocalDate endOfYear = LocalDate.of(year, 12, 31);
-        List<SaleRecord> records = saleRecordRepository.findByDateRange(startOfYear, endOfYear);
+        List<SaleRecord> records = saleRecordRepository.findBySaleDateBetween(startOfYear, endOfYear);
         Map<String, Object> stats = calculateStats(records);
         stats.put("year", year);
         return stats;
