@@ -188,6 +188,10 @@ const handleCommand = async (command) => {
 .side-menu > .el-sub-menu > .el-sub-menu__title {
   height: 50px;
   line-height: 50px;
+  margin: 4px 12px;
+  padding: 0 16px !important;
+  border-radius: 8px;
+  transition: all 0.3s ease;
   color: #334155 !important;
 }
 
