@@ -229,8 +229,9 @@ const loadData = async () => {
 
     // 构建鱼类地图
     fishMap.value = new Map()
-    fishOptions.value = fishRes.data
-    fishRes.data.forEach(fish => {
+    fishOptions.value = fishRes.data.records || fishRes.data
+    const fishData = fishRes.data.records || fishRes.data
+    fishData.forEach(fish => {
       fishMap.value.set(fish.id, fish)
     })
   } catch (error) {
