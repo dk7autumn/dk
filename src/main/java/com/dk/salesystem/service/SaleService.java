@@ -38,10 +38,10 @@ public class SaleService {
             wrapper.eq("fish_id", fishId);
         }
         if (startDate != null) {
-            wrapper.ge("sale_date", startDate);
+            wrapper.ge("sale_datetime", startDate);
         }
         if (endDate != null) {
-            wrapper.le("sale_date", endDate);
+            wrapper.le("sale_datetime", endDate);
         }
 
         Page<SaleRecord> pageResult = saleRecordMapper.selectPage(pageParam, wrapper);

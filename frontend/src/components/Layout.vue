@@ -192,6 +192,11 @@ const handleCommand = async (command) => {
   background: #f1f5f9 !important;
 }
 
+.side-menu .el-sub-menu.is-active > .el-sub-menu__title {
+  color: #6366f1 !important;
+  font-weight: 600;
+}
+
 .menu-item {
   margin: 4px 12px;
   padding: 0 16px !important;
