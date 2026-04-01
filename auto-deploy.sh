@@ -58,8 +58,15 @@ fi
 
 # 6. 启动应用容器
 echo "[6/7] 启动应用容器..."
-APP_RUN_CMD="docker run -d --name $APP_CONTAINER -p 8080:8080 --link $MYSQL_CONTAINER:mysql -e SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/$MYSQL_DATABASE?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true -e SPRING_DATASOURCE_USERNAME=root -e SPRING_DATASOURCE_PASSWORD=$MYSQL_ROOT_PASSWORD --restart unless-stopped $APP_IMAGE"
-eval $APP_RUN_CMD
+docker run -d \
+  --name $APP_CONTAINER \
+  -p 8080:8080 \
+  --link $MYSQL_CONTAINER:mysql \
+  -e "SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/$MYSQL_DATABASE?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true" \
+  -e "SPRING_DATASOURCE_USERNAME=root" \
+  -e "SPRING_DATASOURCE_PASSWORD=$MYSQL_ROOT_PASSWORD" \
+  --restart unless-stopped \
+  $APP_IMAGE
 
 # 7. 验证状态
 echo "[7/7] 验证容器状态..."
