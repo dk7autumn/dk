@@ -225,12 +225,12 @@ const handleCommand = async (command) => {
 
 /* 顶级菜单项激活样式 */
 .side-menu > .el-menu-item.is-active {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
-  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+  background: #f1f5f9 !important;
 }
 
 .side-menu > .el-menu-item.is-active span {
-  color: #ffffff !important;
+  color: #6366f1 !important;
+  font-weight: 600;
 }
 
 /* 子菜单内的菜单项激活样式 - 紫色字体 */
