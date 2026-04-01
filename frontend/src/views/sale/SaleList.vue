@@ -134,7 +134,8 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search, Refresh } from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/user'
-import { getSaleList, addSale, deleteSale, getFishList } from '@/api/sale'
+import { getSaleList, addSale, deleteSale } from '@/api/sale'
+import { getFishList } from '@/api/fish'
 
 const userStore = useUserStore()
 const hasPermission = (permission) => userStore.hasPermission(permission)

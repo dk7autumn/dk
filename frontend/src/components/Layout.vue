@@ -2,28 +2,28 @@
   <div class="layout-container">
     <el-aside :width="isCollapse ? '64px' : '220px'" class="sidebar">
       <div class="logo">
-        <el-icon class="logo-icon"><WaterFilled /></el-icon>
+        <el-icon class="logo-icon"><HotWater /></el-icon>
         <span v-if="!isCollapse" class="logo-text">水产销售系统</span>
       </div>
       <el-menu
         :default-active="activeMenu"
         class="side-menu"
-        background-color="transparent"
-        text-color="#cbd5e1"
-        active-text-color="#ffffff"
+        background-color="#ffffff"
+        text-color="#334155"
+        active-text-color="#6366f1"
         :collapse="isCollapse"
         router
         :collapse-transition="false"
       >
-        <el-menu-item index="/dashboard" class="menu-item">
+        <el-menu-item index="/layout/dashboard" class="menu-item">
           <el-icon class="menu-icon"><HomeFilled /></el-icon>
           <span>首页</span>
         </el-menu-item>
-        <el-menu-item index="/fish" class="menu-item">
+        <el-menu-item index="/layout/fish" class="menu-item">
           <el-icon class="menu-icon"><Shop /></el-icon>
           <span>鱼类管理</span>
         </el-menu-item>
-        <el-menu-item index="/sale" class="menu-item">
+        <el-menu-item index="/layout/sale" class="menu-item">
           <el-icon class="menu-icon"><ShoppingCart /></el-icon>
           <span>销售记录</span>
         </el-menu-item>
@@ -32,15 +32,15 @@
             <el-icon class="menu-icon"><Setting /></el-icon>
             <span>系统管理</span>
           </template>
-          <el-menu-item index="/system/user" v-if="hasPermission('system:user:menu')">
+          <el-menu-item index="/layout/system/user" v-if="hasPermission('system:user:menu')">
             <el-icon><User /></el-icon>
             <span>用户管理</span>
           </el-menu-item>
-          <el-menu-item index="/system/role" v-if="hasPermission('system:role:menu')">
+          <el-menu-item index="/layout/system/role" v-if="hasPermission('system:role:menu')">
             <el-icon><Avatar /></el-icon>
             <span>角色管理</span>
           </el-menu-item>
-          <el-menu-item index="/system/permission" v-if="hasPermission('system:permission:menu')">
+          <el-menu-item index="/layout/system/permission" v-if="hasPermission('system:permission:menu')">
             <el-icon><Lock /></el-icon>
             <span>权限管理</span>
           </el-menu-item>
@@ -54,8 +54,8 @@
             <component :is="isCollapse ? 'Expand' : 'Fold'" />
           </el-icon>
           <el-breadcrumb separator="/">
-            <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-            <el-breadcrumb-item v-if="route.path !== '/dashboard'">{{ breadcrumbTitle }}</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/layout/dashboard' }">首页</el-breadcrumb-item>
+            <el-breadcrumb-item v-if="route.path !== '/layout/dashboard'">{{ breadcrumbTitle }}</el-breadcrumb-item>
           </el-breadcrumb>
         </div>
         <div class="header-right">
@@ -92,7 +92,7 @@ import { useUserStore } from '@/store/user'
 import { ElMessageBox } from 'element-plus'
 import {
   HomeFilled, Shop, ShoppingCart, Setting, User, Avatar, Lock,
-  Expand, Fold, ArrowDown, SwitchButton, WaterFilled
+  Expand, Fold, ArrowDown, SwitchButton, HotWater
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -104,11 +104,11 @@ const activeMenu = computed(() => route.path)
 
 const breadcrumbTitle = computed(() => {
   const titles = {
-    '/fish': '鱼类管理',
-    '/sale': '销售记录',
-    '/system/user': '用户管理',
-    '/system/role': '角色管理',
-    '/system/permission': '权限管理'
+    '/layout/fish': '鱼类管理',
+    '/layout/sale': '销售记录',
+    '/layout/system/user': '用户管理',
+    '/layout/system/role': '角色管理',
+    '/layout/system/permission': '权限管理'
   }
   return titles[route.path] || ''
 })
@@ -147,10 +147,11 @@ const handleCommand = async (command) => {
 }
 
 .sidebar {
-  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  background-color: #ffffff;
   transition: width 0.3s ease;
   overflow-x: hidden;
-  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.05);
+  border-right: 1px solid #e2e8f0;
 }
 
 .logo {
@@ -160,17 +161,18 @@ const handleCommand = async (command) => {
   justify-content: center;
   gap: 12px;
   padding: 0 20px;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
 }
 
 .logo-icon {
   font-size: 28px;
-  color: #fff;
+  color: #6366f1;
 }
 
 .logo-text {
-  color: #fff;
+  color: #1e293b;
   font-size: 18px;
   font-weight: 600;
   letter-spacing: 1px;
@@ -179,28 +181,47 @@ const handleCommand = async (command) => {
 .side-menu {
   border-right: none;
   padding-top: 16px;
+  background-color: #ffffff;
+}
+
+.side-menu .el-sub-menu__title {
+  color: #334155;
+}
+
+.side-menu .el-sub-menu__title:hover {
+  background: #f1f5f9 !important;
 }
 
 .menu-item {
   margin: 4px 12px;
   padding: 0 16px !important;
-  border-radius: 12px;
+  border-radius: 8px;
   transition: all 0.3s ease;
 }
 
 .menu-item:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
+  background: #f1f5f9 !important;
   transform: translateX(4px);
 }
 
 .menu-item.is-active {
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
-  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+}
+
+.menu-item.is-active .menu-icon,
+.menu-item.is-active span {
+  color: #ffffff;
 }
 
 .menu-icon {
   font-size: 20px;
   margin-right: 12px;
+  color: #64748b;
+}
+
+.menu-item:hover .menu-icon {
+  color: #6366f1;
 }
 
 .header {
