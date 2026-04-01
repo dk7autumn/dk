@@ -14,6 +14,7 @@
         :collapse="isCollapse"
         router
         :collapse-transition="false"
+        :default-openeds="['system']"
       >
         <el-menu-item index="/layout/dashboard" class="menu-item">
           <el-icon class="menu-icon"><HomeFilled /></el-icon>

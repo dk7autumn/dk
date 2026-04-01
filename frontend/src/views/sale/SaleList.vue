@@ -25,12 +25,16 @@
         <el-form-item label="日期范围">
           <el-date-picker
             v-model="dateRange"
-            type="daterange"
+            type="datetimerange"
             range-separator="至"
             start-placeholder="开始日期"
             end-placeholder="结束日期"
-            value-format="YYYY-MM-DD"
-            style="width: 240px"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            :default-time="[
+              new Date(2000, 0, 1, 0, 0, 0),
+              new Date(2000, 1, 1, 23, 59, 59)
+            ]"
+            style="width: 320px"
           />
         </el-form-item>
         <el-form-item>
@@ -60,7 +64,11 @@
             ¥{{ row.totalPrice }} 元
           </template>
         </el-table-column>
-        <el-table-column prop="saleDatetime" label="销售时间" width="160" />
+        <el-table-column prop="saleDatetime" label="销售时间" width="180">
+          <template #default="{ row }">
+            {{ formatDateTime(row.saleDatetime) }}
+          </template>
+        </el-table-column>
         <el-table-column prop="remark" label="备注" min-width="150" show-overflow-tooltip />
         <el-table-column label="操作" width="100" v-if="hasPermission('sale:delete')">
           <template #default="{ row }">
@@ -184,6 +192,20 @@ const handleFishChange = (fishId) => {
   if (fish) {
     form.unitPrice = parseFloat(fish.price)
   }
+}
+
+// 格式化日期时间
+const formatDateTime = (datetime) => {
+  if (!datetime) return ''
+  const date = new Date(datetime)
+  if (isNaN(date.getTime())) return datetime
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
 }
 
 const loadData = async () => {
