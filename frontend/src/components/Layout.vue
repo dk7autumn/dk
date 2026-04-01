@@ -184,23 +184,25 @@ const handleCommand = async (command) => {
   background-color: #ffffff;
 }
 
+/* 子菜单标题样式 - 与顶级菜单项对齐 */
 .side-menu .el-sub-menu__title {
-  color: #334155;
   height: 50px;
   line-height: 50px;
+  color: #334155;
 }
 
 .side-menu .el-sub-menu__title:hover {
   background: #f1f5f9 !important;
 }
 
-/* 系统管理子菜单激活时标题颜色 */
-.side-menu .el-sub-menu.is-active > .el-sub-menu__title {
+/* 系统管理子菜单展开时标题颜色 */
+.side-menu .el-sub-menu.is-opened > .el-sub-menu__title {
   color: #6366f1 !important;
-  font-weight: 600;
 }
 
 .menu-item {
+  height: 50px;
+  line-height: 50px;
   margin: 4px 12px;
   padding: 0 16px !important;
   border-radius: 8px;
@@ -209,10 +211,9 @@ const handleCommand = async (command) => {
 
 .menu-item:hover {
   background: #f1f5f9 !important;
-  transform: translateX(4px);
 }
 
-/* 只有直接子级菜单项（非子菜单内）激活时才用白色字体 */
+/* 顶级菜单项激活样式 */
 .el-menu > .menu-item.is-active {
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
   box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
@@ -220,7 +221,17 @@ const handleCommand = async (command) => {
 
 .el-menu > .menu-item.is-active .menu-icon,
 .el-menu > .menu-item.is-active span {
-  color: #ffffff;
+  color: #ffffff !important;
+}
+
+/* 子菜单内的菜单项激活样式 - 保持深色字体 */
+.el-sub-menu .menu-item.is-active {
+  background: #eff6ff !important;
+}
+
+.el-sub-menu .menu-item.is-active span {
+  color: #6366f1 !important;
+  font-weight: 600;
 }
 
 .menu-icon {
@@ -231,16 +242,6 @@ const handleCommand = async (command) => {
 
 .menu-item:hover .menu-icon {
   color: #6366f1;
-}
-
-/* 子菜单内的菜单项激活样式 - 保持深色字体 */
-.el-sub-menu .menu-item.is-active {
-  background: #eff6ff !important;
-  color: #6366f1 !important;
-}
-
-.el-sub-menu .menu-item.is-active .menu-icon {
-  color: #6366f1 !important;
 }
 
 .header {
