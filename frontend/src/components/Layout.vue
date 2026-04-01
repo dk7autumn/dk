@@ -189,16 +189,15 @@ const handleCommand = async (command) => {
   height: 50px !important;
   min-height: 50px !important;
   margin: 4px 12px !important;
-  padding: 0 !important;
-  padding-left: 16px !important;
+  padding: 0 16px !important;
   border-radius: 8px;
   transition: all 0.3s ease;
   color: #334155 !important;
 }
 
-/* 覆盖 Element Plus 子菜单标题默认 padding */
-.side-menu > .el-sub-menu > .el-sub-menu__title .el-sub-menu__title-main {
-  padding: 0 !important;
+/* 隐藏子菜单展开箭头 */
+.side-menu > .el-sub-menu > .el-sub-menu__title .el-sub-menu__icon-arrow {
+  display: none !important;
 }
 
 .side-menu > .el-sub-menu > .el-sub-menu__title:hover {
