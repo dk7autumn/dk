@@ -185,24 +185,20 @@ const handleCommand = async (command) => {
 }
 
 /* 子菜单标题样式 - 与顶级菜单项对齐 */
-.side-menu > .el-sub-menu > .el-sub-menu__title.menu-item,
 .side-menu > .el-sub-menu > .el-sub-menu__title {
   height: 50px !important;
   min-height: 50px !important;
-  line-height: 50px !important;
   margin: 4px 12px !important;
-  padding: 0 16px !important;
+  padding: 0 !important;
+  padding-left: 16px !important;
   border-radius: 8px;
   transition: all 0.3s ease;
   color: #334155 !important;
-  display: flex !important;
-  align-items: center !important;
 }
 
-/* 覆盖 Element Plus 子菜单标题默认样式 */
-.side-menu > .el-sub-menu .el-sub-menu__title > * {
-  display: flex;
-  align-items: center;
+/* 覆盖 Element Plus 子菜单标题默认 padding */
+.side-menu > .el-sub-menu > .el-sub-menu__title .el-sub-menu__title-main {
+  padding: 0 !important;
 }
 
 .side-menu > .el-sub-menu > .el-sub-menu__title:hover {
@@ -212,12 +208,6 @@ const handleCommand = async (command) => {
 /* 系统管理子菜单展开时标题颜色 */
 .side-menu > .el-sub-menu.is-opened > .el-sub-menu__title {
   color: #6366f1 !important;
-}
-
-/* 子菜单标题内的图标和文本对齐 */
-.side-menu > .el-sub-menu > .el-sub-menu__title .el-icon,
-.side-menu > .el-sub-menu > .el-sub-menu__title span {
-  vertical-align: middle;
 }
 
 .menu-item {
