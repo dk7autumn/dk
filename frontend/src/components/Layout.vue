@@ -185,20 +185,18 @@ const handleCommand = async (command) => {
 }
 
 /* 子菜单标题样式 - 与顶级菜单项对齐 */
-.side-menu .el-sub-menu__title,
-.side-menu .el-sub-menu__title span {
+.side-menu > .el-sub-menu > .el-sub-menu__title {
   height: 50px;
   line-height: 50px;
   color: #334155 !important;
 }
 
-.side-menu .el-sub-menu__title:hover {
+.side-menu > .el-sub-menu > .el-sub-menu__title:hover {
   background: #f1f5f9 !important;
 }
 
 /* 系统管理子菜单展开时标题颜色 */
-.side-menu .el-sub-menu.is-opened > .el-sub-menu__title,
-.side-menu .el-sub-menu.is-opened > .el-sub-menu__title span {
+.side-menu > .el-sub-menu.is-opened > .el-sub-menu__title {
   color: #6366f1 !important;
 }
 
