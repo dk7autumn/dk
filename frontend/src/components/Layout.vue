@@ -213,7 +213,10 @@ const handleCommand = async (command) => {
   background: #f1f5f9 !important;
 }
 
-.menu-item span {
+/* 基础字体颜色 - 所有菜单项 */
+.menu-item span,
+.side-menu .el-menu-item span,
+.side-menu .el-sub-menu .el-menu-item span {
   color: #334155 !important;
 }
 
@@ -222,23 +225,29 @@ const handleCommand = async (command) => {
 }
 
 /* 顶级菜单项激活样式 */
-.el-menu > .menu-item.is-active {
+.el-menu > .menu-item.is-active,
+.side-menu > .el-menu-item.is-active {
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
   box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
 }
 
-.el-menu > .menu-item.is-active span {
+.side-menu > .el-menu-item.is-active span {
   color: #ffffff !important;
 }
 
 /* 子菜单内的菜单项激活样式 - 紫色字体 */
-.el-sub-menu .menu-item.is-active {
+.side-menu .el-sub-menu .el-menu-item.is-active {
   background: #eff6ff !important;
 }
 
-.el-sub-menu .menu-item.is-active span {
+.side-menu .el-sub-menu .el-menu-item.is-active span {
   color: #6366f1 !important;
   font-weight: 600;
+}
+
+/* 子菜单展开时标题颜色 */
+.side-menu .el-sub-menu.is-opened > .el-sub-menu__title {
+  color: #6366f1 !important;
 }
 
 .menu-icon {
@@ -247,7 +256,9 @@ const handleCommand = async (command) => {
   color: #64748b;
 }
 
-.menu-item:hover .menu-icon {
+.menu-item:hover .menu-icon,
+.side-menu .el-menu-item:hover .menu-icon,
+.side-menu .el-sub-menu .el-menu-item:hover .menu-icon {
   color: #6366f1;
 }
 
